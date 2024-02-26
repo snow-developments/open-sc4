@@ -1,0 +1,10 @@
+import "luxe: project" for Entry
+
+class Project is Entry {
+  construct entry(target) {
+    name = "Open SimCity4"
+    version = "0.1.0"
+    renderer = "outline/renderer"
+    settings = "outline/settings"
+  }
+}

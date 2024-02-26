@@ -1,0 +1,20 @@
+ui = {
+  elements = [
+    {
+      bounds = [16 456 608 8] // bounds
+      children = [] // children
+      id = "progress.loading"
+      type = "luxe: ui/progress"
+    }
+    {
+      bounds = [16 416 608 32] // bounds
+      children = [] // children
+      id = "text.joke"
+      settings = {
+        align = "center"
+        text = "Reticulating splines..."
+      } // settings
+      type = "luxe: ui/text"
+    }
+  ] // elements
+} // ui

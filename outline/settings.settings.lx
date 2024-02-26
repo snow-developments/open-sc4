@@ -1,0 +1,19 @@
+engine.runtime.log = "debug"
+// engine.render.device = "metal"
+engine = {
+  input.entry = "outline/inputs"
+  runtime = {
+    window = {
+      width = 640
+      height = 480
+      resizable = false
+      fullscreen = false
+    }
+  }
+
+  render = {
+    antialiasing = 2
+    stencil = 8
+    depth = 24
+  }
+}
