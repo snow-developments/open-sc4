@@ -1,0 +1,20 @@
+# Subprojects
+subprojects/glfw
+
+# Dub
+.dub
+docs.json
+__dummy.html
+docs/
+/open-sc4
+open-sc4.so
+open-sc4.dylib
+open-sc4.dll
+open-sc4.a
+open-sc4.lib
+open-sc4-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

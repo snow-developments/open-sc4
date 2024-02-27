@@ -1,0 +1,24 @@
+{
+  "name": "open-sc4",
+  "description": "Open source reimplementation of SimCity 4",
+  "license": "AGPL",
+  "copyright": "Copyright © 2024, Chance Snow",
+  "authors": [
+    "Chance Snow"
+  ],
+  "dependencies": {
+    "bindbc-glfw": "~>1.1.0",
+    "dbpf": "~windows",
+    "wgpu-d": "~wgpu-0.19"
+  },
+  "subConfigurations": {
+    "bindbc-glfw": "staticBC"
+  },
+  "libs-windows": ["glfw3", "msvcrt"],
+  "lflags-posix": ["$OPEN_SC4_PACKAGE_DIR/subprojects/glfw/src/libglfw.a"],
+  "lflags-windows": ["/LIBPATH:$OPEN_SC4_PACKAGE_DIR/subprojects/glfw/src"],
+  "versions": ["GLFW_33"],
+  "preBuildCommands": [
+    "make -C subprojects -f glfw.Makefile"
+  ]
+}
