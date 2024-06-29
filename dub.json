@@ -1,11 +1,12 @@
 {
   "name": "open-sc4",
   "description": "Open source reimplementation of SimCity 4",
-  "license": "AGPL",
-  "copyright": "Copyright © 2024, Chance Snow",
+  "license": "AGPL-3.0-only",
+  "copyright": "Copyright © 2024, Snow Developments, LLC",
   "authors": [
-    "Chance Snow"
+    "Chance Snow <chance@snow.llc>"
   ],
+  "targetType": "staticLibrary",
   "dependencies": {
     "bindbc-glfw": "~>1.1.0",
     "dbpf": "~windows",

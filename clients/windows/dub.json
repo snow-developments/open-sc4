@@ -1,0 +1,17 @@
+{
+  "name": "windows-client",
+  "description": "The Windows client for this open source reimplementation of SimCity 4.",
+  "license": "AGPL-3.0-only",
+  "copyright": "Copyright © 2024, Snow Developments, LLC",
+  "authors": [
+    "Chance Snow <chance@snow.llc>"
+  ],
+  "targetType": "executable",
+  "mainSourceFile": "app.d",
+  "dependencies": {
+    "open-sc4": {
+      "path": "../.."
+    },
+    "modernui": "~master"
+  }
+}

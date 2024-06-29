@@ -1,0 +1,13 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"bindbc-glfw": "1.1.0",
+		"bindbc-loader": "1.1.5",
+		"dbpf": "~windows",
+		"dfl": "0.10.4",
+		"open-sc4": {"path":"../.."},
+		"silly": "1.2.0-dev.2",
+		"undead": "1.1.8",
+		"wgpu-d": "~wgpu-0.19"
+	}
+}

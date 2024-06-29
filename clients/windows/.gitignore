@@ -1,0 +1,21 @@
+# Artifacts
+x64/Debug/*
+x86/Debug/*
+
+# Dub
+.dub
+docs.json
+__dummy.html
+docs/
+/windows
+windows.so
+windows.dylib
+windows.dll
+windows.a
+windows.lib
+windows-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

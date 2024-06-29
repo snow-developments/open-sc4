@@ -1,5 +1,8 @@
+# Visual Studio
+.vs/
+
 # Subprojects
-subprojects/glfw
+subprojects/glfw/
 
 # Dub
 .dub

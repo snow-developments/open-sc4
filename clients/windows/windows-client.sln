@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{AE11FD03-9066-4F66-834D-690E23E53288}") = "windows-client", ".dub/windows-client.visualdproj", "{5EAFFAEA-824B-4C91-A70A-C241655F38C8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BCB52B66-DC3C-4016-A12F-56057A584443} = {BCB52B66-DC3C-4016-A12F-56057A584443}
+		{F25E2E83-9385-4D7B-957C-4F97A824EF78} = {F25E2E83-9385-4D7B-957C-4F97A824EF78}
+		{ADD6CEE6-B685-43EE-B461-3DEC22E12154} = {ADD6CEE6-B685-43EE-B461-3DEC22E12154}
+	EndProjectSection
+EndProject
+Project("{AE11FD03-9066-4F66-834D-690E23E53288}") = "open-sc4", ".dub/open-sc4.visualdproj", "{BCB52B66-DC3C-4016-A12F-56057A584443}"
+EndProject
+Project("{AE11FD03-9066-4F66-834D-690E23E53288}") = "bindbc-glfw", ".dub/bindbc-glfw.visualdproj", "{F25E2E83-9385-4D7B-957C-4F97A824EF78}"
+EndProject
+Project("{AE11FD03-9066-4F66-834D-690E23E53288}") = "dbpf", ".dub/dbpf.visualdproj", "{ADD6CEE6-B685-43EE-B461-3DEC22E12154}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		debug|x64 = debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F25E2E83-9385-4D7B-957C-4F97A824EF78}.debug|x64.ActiveCfg = debug|x64
+		{F25E2E83-9385-4D7B-957C-4F97A824EF78}.debug|x64.Build.0 = debug|x64
+		{BCB52B66-DC3C-4016-A12F-56057A584443}.debug|x64.ActiveCfg = debug|x64
+		{BCB52B66-DC3C-4016-A12F-56057A584443}.debug|x64.Build.0 = debug|x64
+		{5EAFFAEA-824B-4C91-A70A-C241655F38C8}.debug|x64.ActiveCfg = debug|x64
+		{5EAFFAEA-824B-4C91-A70A-C241655F38C8}.debug|x64.Build.0 = debug|x64
+		{ADD6CEE6-B685-43EE-B461-3DEC22E12154}.debug|x64.ActiveCfg = debug|x64
+		{ADD6CEE6-B685-43EE-B461-3DEC22E12154}.debug|x64.Build.0 = debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
