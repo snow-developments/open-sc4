@@ -156,14 +156,11 @@ export default class Game {
       // Swap frame buffers
       this._surfaces.get(window.id)!.present();
       // Handle validation errors
-      this.device!.popErrorScope()?.then((err) => {
+      this.device!.popErrorScope()?.then<void>((err) => {
         const errorMessage = "Unexpected GPU validation error!";
 
-        if (err == null) throw new Error(errorMessage);
-        if (err instanceof Error) throw new Error(err.message, { cause: err });
-        throw new GPUValidationError(
-          err.message ?? `${errorMessage}\n\n\tDetails: ${err}`,
-        );
+        if (err != null && err instanceof Error) throw new Error(err.message, { cause: err });
+        if (err) throw new Error(err.message ?? errorMessage, { cause: err });
       });
     });
   }
