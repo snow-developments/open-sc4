@@ -1,0 +1,27 @@
+{
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "request": "launch",
+      "name": "Open SimCity 4",
+      "type": "node",
+      "program": "${workspaceFolder}/clients/deno/main.ts",
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "runtimeExecutable": "C:\\Users\\enigm\\.deno\\bin\\deno.EXE",
+      "runtimeArgs": [
+        "run",
+        "--inspect-wait",
+        "--allow-all",
+        "--unstable-ffi",
+        "--unstable-webgpu",
+        "--allow-ffi",
+        "--allow-read",
+        "--allow-write",
+        "--allow-env"
+      ],
+      "attachSimplePort": 9229
+    }
+  ]
+}
