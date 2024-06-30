@@ -91,7 +91,7 @@ export default class Game {
     // Update swap WebGPU surfaces when their sizes change
     globalThis.addEventListener("framebuffersize", (ev) => {
       this.resizeGpuSurface(ev.window, this.device!);
-      this.tick(new Tick(1 / 60, 0, this.renderLoop.startupTime));
+      this.tick(new Tick(1 / 60, 0, this.renderLoop.startupTime!));
       if (this.renderLoop.isRunning) this.render();
     });
 
@@ -124,7 +124,20 @@ export default class Game {
     e.preventDefault();
   };
 
-  private tick(tick: Tick): void {
+  private async tick(tick: Tick): Promise<void> {
+    /** Time allowed to GLFW to poll window events, in milliseconds. */
+    const POLL_TIMEOUT = 5;
+    const glfwTimeout = AbortSignal.timeout(POLL_TIMEOUT);
+    // Make sure it doesn't take too long to poll window events
+    await Promise.race([
+      async.abortable(new Promise<void>((resolve) => {
+        pollEvents(false);
+        resolve();
+      }), glfwTimeout).then(() => glfwTimeout.throwIfAborted()),
+      async.delay(POLL_TIMEOUT, { signal: glfwTimeout }).then(
+        () => Promise.reject("GLFW is taking too long to poll window events.")
+      )
+    ])
     // TODO: Update the current game scenes
   }
 
