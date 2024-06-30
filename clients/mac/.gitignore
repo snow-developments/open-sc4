@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/mac-client
+mac-client.so
+mac-client.dylib
+mac-client.dll
+mac-client.a
+mac-client.lib
+mac-client-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

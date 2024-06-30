@@ -4,7 +4,11 @@
   "license": "AGPL",
   "copyright": "Copyright © 2024, Chance Snow",
   "authors": [
-    "Chance Snow"
+    "Chance Snow <chance@snow.llc>"
+  ],
+  "targetType": "dynamicLibrary",
+  "subPackages": [
+    "clients/mac"
   ],
   "dependencies": {
     "bindbc-glfw": "~>1.1.0",
