@@ -7,9 +7,7 @@
     "Chance Snow"
   ],
   "dependencies": {
-    "bindbc-glfw": "~>1.1.0",
-    "dbpf": "~windows",
-    "wgpu-d": "~wgpu-0.19"
+    "dbpf": "~windows"
   },
   "subConfigurations": {
     "bindbc-glfw": "staticBC"
