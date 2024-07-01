@@ -2,6 +2,7 @@
   "tasks": {
     "lint": "deno check clients/deno/main.ts",
     "test": "deno test --watch",
-    "dev": "deno run --unstable-ffi --unstable-webgpu --allow-ffi --allow-read --allow-write --allow-env clients/deno/main.ts"
+    "dev": "deno run --unstable-ffi --unstable-webgpu --allow-ffi --allow-read --allow-write --allow-env clients/deno/main.ts",
+    "shapes": "deno run --unstable-ffi --allow-ffi --allow-read --allow-write --allow-env clients/deno/shapes.ts"
   }
 }
