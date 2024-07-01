@@ -6,17 +6,19 @@
   "authors": [
     "Chance Snow"
   ],
+  "targetType": "dynamicLibrary",
   "dependencies": {
     "dbpf": "~windows"
   },
-  "subConfigurations": {
-    "bindbc-glfw": "staticBC"
-  },
-  "libs-windows": ["glfw3", "msvcrt"],
-  "lflags-posix": ["$OPEN_SC4_PACKAGE_DIR/subprojects/glfw/src/libglfw.a"],
-  "lflags-windows": ["/LIBPATH:$OPEN_SC4_PACKAGE_DIR/subprojects/glfw/src"],
-  "versions": ["GLFW_33"],
-  "preBuildCommands": [
-    "make -C subprojects -f glfw.Makefile"
-  ]
+  "subConfigurations": {},
+  "configurations": [
+    {
+      "name": "library"
+    },
+    {
+      "name": "static",
+      "targetType": "staticLibrary"
+    }
+  ],
+  "libs-windows": ["msvcrt"]
 }

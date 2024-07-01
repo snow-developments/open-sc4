@@ -1,3 +1,5 @@
+module sc4.tgi;
+
 /// See_Also: $(OL
 ///   $(LI <a href="https://www.wiki.sc4devotion.com/index.php?title=Type_Group_Instance">Type Group Instance</a> (SC4D Encyclopedia))
 ///   $(LI <a href="https://www.wiki.sc4devotion.com/index.php?title=Type_ID">Type ID</a> (SC4D Encyclopedia))
@@ -276,8 +278,22 @@ enum SoundGroup : uint {
   activationSounds = 0x0A4D1926,
   /// Audio Loop ID
   audioLoop = 0x0A4D1926,
-  /// Fireworks,Riots, Children, Anger, Demo, Crime,Construction, Jet Effects
-  fireworks,Riots,Children,Anger,Demo,Crime,Construction,JetEffects = 0x0A4D192D,
+  /// Fireworks Effects
+  fireworkEffects = 0x0A4D192D,
+  /// Riots Effects
+  riotsEffects = 0x0A4D192D,
+  /// Children Effects
+  childrenEffects = 0x0A4D192D,
+  /// Anger Effects
+  angerEffects = 0x0A4D192D,
+  /// Demo (demolition?) Effects
+  demoEffects = 0x0A4D192D,
+  /// Crime Effects
+  crimeEffects = 0x0A4D192D,
+  /// Construction Effects
+  constructionEffects = 0x0A4D192D,
+  /// Jet Effects
+  jetEffects = 0x0A4D192D,
   /// Query Sounds
   query = 0x2A4D1940,
   /// Plop Effects
@@ -305,7 +321,7 @@ enum SoundGroup : uint {
   /// Fireworks Effects
   fireworks = 0xAA4D1933,
   /// Construction Effects
-  construction = 0xAA4D1933,
+  constructionEffectsCntd = 0xAA4D1933,
   /// Sims Effects
   sims = 0xAA4D1933,
   /// UDI Effects
@@ -324,11 +340,11 @@ enum TextGroup : uint {
   /// Misc. Item Names
   miscItemNames = 0xEA5524EB,
   /// Misc. Item Names
-  miscItemNames = 0x6A554AFD,
+  miscItemNamesCntd = 0x6A554AFD,
   /// Misc. Descriptions
   miscDescriptions = 0xEA5524EB,
   /// Misc. Descriptions
-  miscDescriptions = 0x6A554AFD,
+  miscDescriptionsCntd = 0x6A554AFD,
   /// Misc. Texts
   misc = 0xEA231E96,
   /// Popup window HTML
