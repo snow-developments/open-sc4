@@ -25,10 +25,9 @@ export default class Game {
   limitFrameRate = false;
   private _windows: DwmWindow[] = [];
   private _mainWindow: DwmWindow | null = null;
-  private readonly preferredSurfaceFormat = navigator.gpu
-    .getPreferredCanvasFormat();
+  private readonly preferredSurfaceFormat = navigator.gpu.getPreferredCanvasFormat();
 
-  constructor(public readonly locale: string = "en-US") {}
+  constructor(public readonly locale: string = "en-US") { }
 
   get adapter() {
     return this._adapter;
@@ -44,9 +43,7 @@ export default class Game {
     // See https://github.com/denoland/deno/blob/main/ext/webgpu/01_webgpu.js#L507
     // TODO: Assert we get some info back, e.g. these keys: ["vendor", "device", "description"]
     return this._adapter?.requestAdapterInfo() ?? Promise.reject(
-      new Error(
-        "GPU adapter is not available.",
-      ),
+      new Error("GPU adapter is not available."),
     );
   }
 
@@ -61,7 +58,7 @@ export default class Game {
       throw Error("Could not acquire a suitable WebGPU adapter.");
     }
     this._device = await this._adapter!.requestDevice({
-      label: "Teraflop GPU Device",
+      label: "GPU Device",
       requiredLimits: {
         ...this._adapter.limits,
         // Don't require GPU storage buffers

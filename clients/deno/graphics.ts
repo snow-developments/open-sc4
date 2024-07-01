@@ -1,5 +1,5 @@
 export class Color {
-  constructor(readonly r = 0, readonly g = 0, readonly b = 0, readonly a = 1) {}
+  constructor(readonly r = 0, readonly g = 0, readonly b = 0, readonly a = 1) { }
 
   static rgb(r: number, g: number, b: number): Color {
     return new Color(r / 255, g / 255, b / 255);
