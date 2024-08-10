@@ -77,7 +77,7 @@ export default class Game {
     });
     if (!this._device) throw Error("Could not acquire a suitable WebGPU device.");
 
-    const window = this._mainWindow = this.createWindow("Open SimCity 4", 800, 450);
+    const window = this._mainWindow = this.createWindow("Open SimCity 4", 640, 480);
     const surface = window.windowSurface();
     this._surfaces.set(window.id, surface);
     const context = surface.getContext("webgpu");
