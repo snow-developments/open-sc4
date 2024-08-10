@@ -3,7 +3,7 @@
 	"versions": {
 		"bindbc-glfw": "1.1.0",
 		"bindbc-loader": "1.1.4",
-		"dbpf": "~windows",
-		"wgpu-d": "~wgpu-0.19"
+		"dbpf": "~main",
+		"pry": "0.7.0"
 	}
 }

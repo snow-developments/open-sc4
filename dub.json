@@ -2,13 +2,13 @@
   "name": "open-sc4",
   "description": "Open source reimplementation of SimCity 4",
   "license": "AGPL",
-  "copyright": "Copyright © 2024, Chance Snow",
+  "copyright": "Copyright © 2024, Snow Developments, LLC.",
   "authors": [
     "Chance Snow"
   ],
   "targetType": "dynamicLibrary",
   "dependencies": {
-    "dbpf": "~windows"
+    "dbpf": "~main",
   },
   "subConfigurations": {},
   "configurations": [
