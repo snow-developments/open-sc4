@@ -8,7 +8,8 @@
     "lineWidth": 120
   },
   "imports": {
-    "@3d/three": "jsr:@3d/three@0.167.0-dev.deno.1"
+    "@3d/three": "jsr:@3d/three@0.167.0-dev.deno.1",
+    "dwm@0.3.6": "https://deno.land/x/dwm@0.3.6/mod.ts"
   },
   "compilerOptions": {
     "lib": [

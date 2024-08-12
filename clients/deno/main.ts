@@ -6,140 +6,10 @@ import {
   DwmWindow,
   getPrimaryMonitor,
   pollEvents,
-} from "https://deno.land/x/dwm@0.3.6/mod.ts";
+} from "dwm@0.3.6";
 import { type Camera, PerspectiveCamera, Scene } from "@3d/three"
-import * as renderers from "@3d/three/renderers"
-import * as GPU from "@3d/three/renderers/webgpu"
-import { WebGPUBackend } from "@3d/three/renderers/webgpu"
 
-import WebGPU, { Color } from "./graphics.ts";
-
-type GPUParameters = Partial<{
-  context: GPUCanvasContext,
-  adapter: GPUAdapter,
-  device: GPUDevice,
-  logarithmicDepthBuffer: boolean,
-  powerPreference: GPUPowerPreference,
-  alpha: boolean,
-  antialias: boolean,
-  sampleCount: number,
-  requiredLimits: GPUSupportedLimits,
-}>;
-
-class Backend extends WebGPUBackend {
-  declare parameters: GPUParameters;
-  declare context: GPUCanvasContext | undefined;
-  private readonly preferredSurfaceFormat = navigator.gpu.getPreferredCanvasFormat();
-
-  constructor(readonly window: DwmWindow, parameters: GPUParameters) {
-    super({
-      ...parameters,
-      // deno-lint-ignore no-window
-      context: window.windowSurface().getContext("webgpu")
-    });
-
-    // Update swap WebGPU surfaces when their sizes change
-    globalThis.addEventListener("framebuffersize", (ev) => {
-      if (ev.window !== window) return;
-      this.resizeGpuSurface();
-      // TODO: Tick the scene
-      // this.tick(new Tick(1 / 60, 0, this.renderLoop.startupTime!));
-      // if (this.renderLoop.isRunning) this.render();
-    });
-  }
-
-  async init(renderer: Renderer) {
-    this.renderer = renderer;
-
-    const parameters = this.parameters;
-
-    // Create the device if it is not passed with parameters
-    const device = parameters.device ?? await (async () => {
-      const adapter = WebGPU.adapter!;
-
-      const features = Object.values(GPU.Constants.GPUFeatureName) as GPUFeatureName[];
-      return await adapter.requestDevice({
-        requiredFeatures: features.filter(feature => adapter.features.has(feature)),
-        requiredLimits: (parameters.requiredLimits ?? {}) as Record<string, number>
-      });
-    })();
-
-    this.device = device;
-    this.context = parameters.context;
-
-    this.resizeGpuSurface();
-    this.updateSize();
-  }
-
-  getDomElement() {
-    const window = this.window;
-    const markFramebufferDirty = this.markFramebufferDirty.bind(this);
-
-    return {
-      get width() { return window.framebufferSize.width; },
-      set width(value: number) {
-        window.framebufferSize.width = value;
-        markFramebufferDirty();
-      },
-      get height() { return window.framebufferSize.height; },
-      set height(value: number) {
-        window.framebufferSize.height = value;
-        markFramebufferDirty();
-      },
-      style: {
-        get width() { return `${window.framebufferSize.width}px`; },
-        set width(value: string) {
-          window.framebufferSize.width = parseInt(value);
-          markFramebufferDirty();
-        },
-        get height() { return `${window.framebufferSize.height}px`; },
-        set height(value: string) {
-          window.framebufferSize.height = parseInt(value);
-          markFramebufferDirty();
-        }
-      }
-    };
-  }
-
-  // deno-lint-ignore no-explicit-any
-  beginRender(renderContext: any) {
-    // if (this.framebufferDirty) this.resizeGpuSurface();
-    super.beginRender(renderContext);
-  }
-
-  private framebufferDirty = false;
-  private markFramebufferDirty() {
-    this.framebufferDirty = true;
-  }
-
-  private resizeGpuSurface() {
-    const { width, height } = this.window.framebufferSize;
-    console.log('Resizing framebuffer: ', this.window.framebufferSize);
-    const alphaMode = (this.parameters as { alpha?: boolean }).alpha ? 'premultiplied' : 'opaque';
-    // FIXME: Error: Surface is not configured for presentation
-    this.context?.configure({
-      device: this.device,
-      format: this.preferredSurfaceFormat,
-      alphaMode,
-      width,
-      height,
-    });
-  }
-}
-
-class Renderer extends renderers.Renderer {
-  readonly isWebGPURenderer = true;
-
-  constructor(window: DwmWindow, parameters: GPUParameters = {}) {
-    assert(WebGPU.isAvailable, "WebGPU is not supported. Please update your graphics drivers.");
-    parameters = { ...parameters, antialias: true };
-    // TODO: super(new Proxy(new Backend(window, parameters), debugHandler));
-    super(new Backend(window, parameters), parameters);
-
-    this.setPixelRatio(window.framebufferSize.width / window.size.width);
-    this.setSize(window.framebufferSize.width, window.framebufferSize.height);
-  }
-}
+import WebGPU, { Color, Renderer } from "./graphics.ts";
 
 export default class Game {
   public clearColor: Color = Color.cornflowerBlue;
@@ -157,7 +27,7 @@ export default class Game {
   private _mainWindow: DwmWindow | null = null;
 
   constructor(public readonly locale: string = "en-US") {
-    assert(WebGPU.isAvailable, "WebGPU is not supported.");
+    WebGPU.ensureAvailability("WebGPU is not supported.");
   }
 
   /** @rejects When the GPU adapter is unavailable. */
@@ -178,8 +48,6 @@ export default class Game {
     globalThis.addEventListener("unhandledrejection", this.unhandledRejection);
 
     const window = this._mainWindow = this.createWindow("Open SimCity 4", 640, 480);
-    const surface = window.windowSurface();
-    const context = surface.getContext("webgpu");
     this._renderers.set(window.id, new Renderer(window, {
       adapter,
       requiredLimits: {
@@ -198,7 +66,6 @@ export default class Game {
         maxComputeWorkgroupSizeZ: 0,
       },
     }));
-    if (!this._device) throw Error("Could not acquire a suitable WebGPU device.");
     this._windows.push(window);
 
     return this.renderLoop.start().finished;
