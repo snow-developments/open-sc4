@@ -7,16 +7,17 @@ import {
   getPrimaryMonitor,
   pollEvents,
 } from "dwm@0.3.6";
-import { type Camera, PerspectiveCamera, Scene } from "@3d/three"
+import { Camera, PerspectiveCamera, Scene } from "@3d/three"
 
 import WebGPU, { Color, Renderer } from "./graphics.ts";
+
+const POLL_TIMEOUT = 5;
 
 export default class Game {
   public clearColor: Color = Color.cornflowerBlue;
 
   private _renderers = new Map<string, Renderer>();
   private _scenes = new Map<string, Scene>();
-  private _cameras = new Map<string, Camera>();
   private renderLoop = new RenderLoop(60, {
     tick: this.tick.bind(this),
     render: this.render.bind(this),
@@ -32,12 +33,10 @@ export default class Game {
 
   /** @rejects When the GPU adapter is unavailable. */
   get gpuInfo() {
-    // Unmask GPU device info
-    // See https://github.com/denoland/deno/blob/main/ext/webgpu/01_webgpu.js#L507
+    const info = WebGPU.adapter?.info;
+    if (info === undefined) throw new Error("GPU adapter information is not available.");
     // TODO: Assert we get some info back, e.g. these keys: ["vendor", "device", "description"]
-    return WebGPU.adapter?.requestAdapterInfo() ?? Promise.reject(
-      new Error("GPU adapter information is not available.")
-    );
+    return Promise.resolve(WebGPU.adapter!.info);
   }
 
   run() {
@@ -48,7 +47,7 @@ export default class Game {
     globalThis.addEventListener("unhandledrejection", this.unhandledRejection);
 
     const window = this._mainWindow = this.createWindow("Open SimCity 4", 640, 480);
-    this._renderers.set(window.id, new Renderer(window, {
+    const renderer = new Renderer(window, {
       adapter,
       requiredLimits: {
         ...adapter.limits,
@@ -65,8 +64,15 @@ export default class Game {
         maxComputeWorkgroupSizeY: 0,
         maxComputeWorkgroupSizeZ: 0,
       },
-    }));
+    });
+    this._renderers.set(window.id, renderer);
     this._windows.push(window);
+
+    const scene = new Scene();
+    scene.name = window.id;
+    scene.background = this.clearColor;
+    scene.add(new PerspectiveCamera(90, renderer.aspectRatio, 0.01, 1000));
+    this._scenes.set(window.id, scene);
 
     return this.renderLoop.start().finished;
   }
@@ -101,7 +107,6 @@ export default class Game {
 
   private async tick(tick: Tick): Promise<void> {
     /** Time allowed to GLFW to poll window events, in milliseconds. */
-    const POLL_TIMEOUT = 5;
     const glfwTimeout = AbortSignal.timeout(POLL_TIMEOUT);
     // Make sure it doesn't take too long to poll window events
     await Promise.race([
@@ -110,24 +115,25 @@ export default class Game {
         resolve();
       }), glfwTimeout).then(() => glfwTimeout.throwIfAborted()),
       async.delay(POLL_TIMEOUT, { signal: glfwTimeout }).then(
-        () => Promise.reject("GLFW is taking too long to poll window events.")
+        () => console.warn(`GLFW is taking too long (> ${POLL_TIMEOUT}ms) to poll window events.`)
       )
     ])
 
     for (const renderer of this._renderers.values()) renderer.setClearColor(this.clearColor.hexOpaque);
     for (const scene of this._scenes.values()) {
-      // TODO: Update the current game scenes
+      // TODO: Update the game's scenes
     }
   }
 
   private render() {
     // Render the scene in each window
-    this._windows.map((window) =>
-      this._renderers.get(window.id)?.renderAsync(
-        this._scenes.get(window.id),
-        this._cameras.get(window.id),
-      )
-    );
+    for (const window of this._windows.values()) {
+      const scene = this._scenes.get(window.id);
+      if (scene === undefined) continue;
+      const camera = scene.children.find(node => node instanceof Camera);
+      if (camera === undefined) continue;
+      this._renderers.get(window.id)?.renderAsync(scene, camera);
+    };
   }
 }
 

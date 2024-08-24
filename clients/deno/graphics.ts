@@ -1,12 +1,13 @@
 // deno-lint-ignore-file no-window
 import { CanvasRenderingContext2D } from "https://deno.land/x/dwm@0.3.4/ext/canvas.ts";
 
+import * as three from "@3d/three";
+import * as renderers from "@3d/three/renderers";
+import * as GPU from "@3d/three/renderers/webgpu";
+import { WebGPUBackend } from "@3d/three/renderers/webgpu";
 import { DwmWindow } from "dwm@0.3.6";
-import { assert, assertExists, unimplemented } from "jsr:@std/assert";
+import { assert, assertExists } from "jsr:@std/assert";
 import { OmitFunctions } from "./types.ts";
-import * as renderers from "@3d/three/renderers"
-import * as GPU from "@3d/three/renderers/webgpu"
-import { WebGPUBackend } from "@3d/three/renderers/webgpu"
 
 type Style = Partial<OmitFunctions<CanvasRenderingContext2D> & {
   background: string
@@ -75,21 +76,27 @@ type GPUParameters = Partial<{
 class Backend extends WebGPUBackend {
   declare parameters: GPUParameters;
   declare context: Context;
+  declare device: GPUDevice;
+  readonly surface: Deno.UnsafeWindowSurface;
+  declare renderer: Renderer;
+  declare defaultRenderPassdescriptor: GPURenderPassDescriptor | null;
   private readonly preferredSurfaceFormat = navigator.gpu.getPreferredCanvasFormat();
 
   constructor(readonly window: DwmWindow, parameters: GPUParameters) {
     WebGPU.ensureAvailability();
-    const context = parameters.context || window.windowSurface().getContext("webgpu") as Context;
+    const surface = window.windowSurface();
+    const context = surface.getContext("webgpu") as Context;
     super({ ...parameters, context });
 
     assertExists(this.context = this.parameters.context as Context);
-    console.log(this.context);
+    this.surface = surface;
 
     // Update swap WebGPU surfaces when their sizes change
-    globalThis.addEventListener("framebuffersize", (ev) => {
+    globalThis.addEventListener("framebuffersize", async (ev) => {
       if (ev.window !== window) return;
       this.configureGpuSurface();
-      // TODO: Tick the scene
+      this.renderer.setPixelRatio(window.framebufferSize.width / window.size.width);
+      // TODO: Tick the scene to reduce flickering
       // this.tick(new Tick(1 / 60, 0, this.renderLoop.startupTime!));
       // if (this.renderLoop.isRunning) this.render();
     });
@@ -101,40 +108,44 @@ class Backend extends WebGPUBackend {
 
   get surfaceConfig(): GPUCanvasConfiguration {
     const { width, height } = this.window.framebufferSize;
-    console.log('Resizing framebuffer: ', this.window.framebufferSize);
-    const alphaMode = (this.parameters as { alpha?: boolean }).alpha ? 'premultiplied' : 'opaque';
+    // FIXME: Transparent frame buffers are not supported
+    // const alphaMode = (this.parameters as { alpha?: boolean }).alpha ? 'premultiplied' : 'opaque';
     return {
       device: this.device,
       format: this.preferredSurfaceFormat,
-      alphaMode,
+      alphaMode: 'opaque',
       width,
       height,
     };
   }
 
   async init(renderer: Renderer) {
+    if (this.device != null && this.domElement != null) return;
+
     WebGPU.ensureAvailability();
-    assertExists(this.context);
-    this.renderer = renderer;
-    const parameters = this.parameters;
-    if (!parameters.context) throw Error("Could not acquire a suitable WebGPU device.");
-    assertExists(parameters.context);
     const context = WebGPU.selectContext(this);
-    // FIXME: Configure the context's frame buffer
-    assertExists(context.canvas = this.getDomElement(), "Could not acquire a suitable WebGPU canvas.");
-    this.configureGpuSurface();
+    this.renderer = renderer;
+    assertExists(context, "Could not acquire a suitable WebGPU device.");
 
     // Create the device if it is not passed with parameters
+    const parameters = this.parameters;
     this.device = parameters.device ?? await (async () => {
       const adapter = WebGPU.ensureAdapter();
       const features = Object.values(GPU.Constants.GPUFeatureName) as GPUFeatureName[];
       return await adapter.requestDevice({
+        label: "Open SimCity 4",
         requiredFeatures: features.filter(feature => adapter.features.has(feature)),
         requiredLimits: (parameters.requiredLimits ?? {}) as Record<string, number>
       });
     })();
 
+    // Configure the context's  canvas frame buffer
+    this.configureGpuSurface();
+    // FIXME: const canvas = WebGPU.selectContext(this).canvas;
+    // assertExists(context.canvas, "Could not acquire a suitable WebGPU canvas.");
+
     this.updateSize();
+    this.domElement = this.getDomElement();
   }
 
   getDomElement() {
@@ -167,10 +178,24 @@ class Backend extends WebGPUBackend {
     };
   }
 
-  // deno-lint-ignore no-explicit-any
-  beginRender(renderContext: any) {
+  beginRender(context: renderers.RenderContext) {
     // if (this.framebufferDirty) this.resizeGpuSurface();
-    super.beginRender(renderContext);
+    super.beginRender(context);
+    for (const target of this.defaultRenderPassdescriptor?.colorAttachments.map(toRenderTarget) ?? []) {
+      if (target) target.label = this.window.id;
+    }
+  }
+
+  finishRender(context: renderers.RenderContext): void {
+    super.finishRender(context);
+    const pass = this.get(context) as GpuPass;
+    const targets = isRenderPass(pass) ? pass.descriptor.colorAttachments.map(toRenderTarget).map(target => target?.label ?? null) : [];
+    const isWindowRenderPass = targets.includes(this.window.id);
+    // FIXME: This hacky render target detection is broken, but prevents errors when calling present
+    if (hasRenderTarget(context) && isWindowRenderPass) this.surface.present();
+    this.device.queue.onSubmittedWorkDone().then(() => {
+      // TODO: Collate render statistics
+    });
   }
 
   private framebufferDirty = false;
@@ -179,9 +204,37 @@ class Backend extends WebGPUBackend {
   }
 
   private configureGpuSurface() {
-    console.log('Resizing framebuffer: ', this.window.framebufferSize);
+    console.info('Resizing framebuffer: ', this.window.framebufferSize);
     WebGPU.selectContext(this.context || this).configure(this.surfaceConfig);
   }
+}
+
+function toRenderTarget(target: GPURenderPassColorAttachment | null): GPUTextureView | undefined {
+  return target?.resolveTarget ?? target?.view;
+}
+
+interface GpuPass {
+  currentPass: GPURenderPassEncoder | GPUComputePassEncoder
+  descriptor: GPURenderPassDescriptor | GPUComputePassDescriptor
+  encoder: GPUCommandEncoder
+}
+
+function isRenderPass(value: GpuPass): value is Exclude<GpuPass, "currentPass" | "descriptor"> & {
+  currentPass: GPURenderPassEncoder,
+  descriptor: GPURenderPassDescriptor
+} {
+  return value.currentPass instanceof GPURenderPassEncoder;
+}
+
+function isComputePass(value: GpuPass): value is Exclude<GpuPass, "currentPass" | "descriptor"> & {
+  currentPass: GPUComputePassEncoder,
+  descriptor: GPUComputePassDescriptor
+} {
+  return value.currentPass instanceof GPUComputePassEncoder;
+}
+
+function hasRenderTarget(context: renderers.RenderContext) {
+  return (context.textures as three.Texture[] | null)?.some(tex => tex.isRenderTargetTexture) ?? false;
 }
 
 export class Renderer extends renderers.Renderer {
@@ -193,24 +246,26 @@ export class Renderer extends renderers.Renderer {
     parameters = { ...parameters, antialias: true };
     // TODO: super(new Proxy(new Backend(window, parameters), debugHandler));
     super(new Backend(window, parameters), parameters);
+    this.setPixelRatio(window.framebufferSize.width / window.size.width);
+  }
 
-    this.backend.init(this).then(() => {
-      assertExists(this.backend.context.canvas);
-      this.setPixelRatio(window.framebufferSize.width / window.size.width);
-      this.setSize(window.framebufferSize.width, window.framebufferSize.height);
-    });
+  get aspectRatio() {
+    const { width, height } = this.backend.window.framebufferSize;
+    return width / height;
   }
 }
 
-export class Color {
-  constructor(readonly r = 0, readonly g = 0, readonly b = 0, readonly a = 1) { }
+export class Color extends three.Color {
+  constructor(readonly r = 0, readonly g = 0, readonly b = 0, readonly a = 1) {
+    super(r, g, b);
+  }
 
   get hex() {
     return 1 << 32 | this.r << 24 | this.g << 16 | this.b << 8 | Math.round(255 * this.a);
   }
 
   get hexOpaque() {
-    return 1 << 24 | this.r << 16 | this.g << 8 | this.b;
+    return this.getHex();
   }
 
   toString() {
@@ -218,7 +273,7 @@ export class Color {
   }
 
   toStringOpaque() {
-    return "#" + (1 << 24 | this.r << 16 | this.g << 8 | this.b).toString(16).slice(1);
+    return this.getHexString();
   }
 
   static rgb(r: number, g: number, b: number): Color {
